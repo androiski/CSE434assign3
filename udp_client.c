@@ -1,5 +1,5 @@
 //Andrew Murza 
-//UDP_client 
+//UDP_client.c
 //CSE 434
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +9,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#include "msgstruct.h"
 
 int main() {
 
