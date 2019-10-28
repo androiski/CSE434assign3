@@ -67,7 +67,7 @@ int main() {
             log = fopen("serverlog.txt", "a");
             fprintf(log, "<%d:%d:%d> [%s:%hu] post#%s", msg.timepost.tm_hour,msg.timepost.tm_min,msg.timepost.tm_sec,inet_ntoa(cliaddr.sin_addr),
                         cliaddr.sin_port,msg.memo);
-            fprintf(log, log, "<%d:%d:%d> [%s:%hu] post_ack#successful\n", svrtime.tm_hour,svrtime.tm_min,svrtime.tm_sec,inet_ntoa(cliaddr.sin_addr),
+            fprintf(log, "<%d:%d:%d> [%s:%hu] post_ack#successful\n", svrtime.tm_hour,svrtime.tm_min,svrtime.tm_sec,inet_ntoa(cliaddr.sin_addr),
                         cliaddr.sin_port);
             fflush(log);
             fclose(log);
@@ -93,7 +93,7 @@ int main() {
             log = fopen("serverlog.txt", "a");
             fprintf(log, "<%d:%d:%d> [%s:%hu] retrieve#\n", msg.timepost.tm_hour,msg.timepost.tm_min,msg.timepost.tm_sec,inet_ntoa(cliaddr.sin_addr),
                         cliaddr.sin_port);
-            fprintf(log, log, "<%d:%d:%d> [%s:%hu] retrieve#%s", svrtime.tm_hour,svrtime.tm_min,svrtime.tm_sec,inet_ntoa(cliaddr.sin_addr),
+            fprintf(log, "<%d:%d:%d> [%s:%hu] retrieve#%s", svrtime.tm_hour,svrtime.tm_min,svrtime.tm_sec,inet_ntoa(cliaddr.sin_addr),
                         cliaddr.sin_port, recent.memo);
             fflush(log);
             fclose(log);
