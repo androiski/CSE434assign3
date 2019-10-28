@@ -12,7 +12,6 @@
 
 #include <time.h>
 #include <stdint.h>
-#include <limits.h>
 
 typedef struct{
 
@@ -58,32 +57,46 @@ int main() {
 
     while (1) {
         memset(&recv_buffer, 0, sizeof(recv_buffer));
-        recvfrom(sockfd, &msg, sizeof(msg), 0, (struct sockaddr *) &cliaddr, &len);
+        recvfrom(sockfd, &msg, sizeof(msgstruct), 0, (struct sockaddr *) &cliaddr, &len);
 
         if(msg.opcode == 1 && msg.firstnm == (uint8_t)'A' && msg.lastnm == (uint8_t)'M'){
+            //printf("POST#: %s", msg.memo);
             time(&_time);
             svrtime = *localtime(&_time);
 
             log = fopen("serverlog.txt", "a");
+            //printf("log opened\n");
             fprintf(log, "<%d:%d:%d> [%s:%hu] post#%s", msg.timepost.tm_hour,msg.timepost.tm_min,msg.timepost.tm_sec,inet_ntoa(cliaddr.sin_addr),
                         cliaddr.sin_port,msg.memo);
+           // printf("wrote log msg\n");
             fprintf(log, "<%d:%d:%d> [%s:%hu] post_ack#successful\n", svrtime.tm_hour,svrtime.tm_min,svrtime.tm_sec,inet_ntoa(cliaddr.sin_addr),
                         cliaddr.sin_port);
+            //printf("wrote log svr\n");
             fflush(log);
             fclose(log);
 
-            for(int i = 0; msg.length; i++){
-                msg.memo[i] = recent.memo[i];
+            int j = 0;
+            while(msg.memo[j] != '\n'){
+                //printf("msglen%u\nsave to recent index: %u\n", msg.length, j);
+                recent.memo[j] = msg.memo[j];
+                //printf("recent: %s\n", recent.memo);
+                j = j + 1;
             }
+            recent.memo[j] = '\n';
+
             recent.length = msg.length;
+            //printf("recent len: %u\nrecent memo: %s", recent.length, recent.memo);
             msgstruct ack;
             ack.opcode = 2;
             ack.firstnm = (uint8_t)'A';
             ack.lastnm = (uint8_t)'M'; 
             
+            //printf("sends da ack\n");
             sendto(sockfd, &ack, sizeof(msgstruct), 0, (struct sockaddr *) &cliaddr, sizeof(cliaddr));
+            //printf("sent da ack\n");
         }
         else if(msg.opcode == 3 && msg.firstnm == (uint8_t)'A' && msg.lastnm == (uint8_t)'M'){
+            //printf("RETRIEVE: %s", msg.memo);
             time(&_time);
             svrtime = *localtime(&_time);
             recent.opcode = 4;
@@ -97,7 +110,7 @@ int main() {
                         cliaddr.sin_port, recent.memo);
             fflush(log);
             fclose(log);
-
+            //printf("recent len: %u\nrecent memo: %s", recent.length, recent.memo);
             sendto(sockfd, &recent, sizeof(msgstruct), 0, (struct sockaddr *) &cliaddr, sizeof(cliaddr));
         }
 
