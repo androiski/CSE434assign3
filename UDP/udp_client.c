@@ -15,8 +15,8 @@
 
 typedef struct{
 
-    uint8_t firstnm; //first name 
-    uint8_t lastnm; //last name 
+    char firstnm; //first name 
+    char lastnm; //last name 
     uint8_t opcode; //opcode
     struct tm timepost; //timepost
     uint8_t length; //number of char to send
@@ -136,8 +136,8 @@ int main() {
             msg.timepost = *localtime(&_time);
 
             //codes
-            msg.firstnm = (uint8_t)'A';
-            msg.lastnm = (uint8_t)'M';
+            msg.firstnm = 'A';
+            msg.lastnm = 'M';
             msg.opcode = (uint8_t)1;
             
             //save send_buffer message to msg.memo
@@ -158,17 +158,18 @@ int main() {
             //printf("%u %u %u\n", ack.firstnm, ack.lastnm, ack.opcode);
 
             //if whatever is received is an ACK, opcode2, print success
-            if(ack.opcode == 2 && ack.firstnm == (uint8_t)'A' && ack.lastnm == (uint8_t)'M'){
+            if(ack.opcode == 2 && ack.firstnm == 'A' && ack.lastnm == 'M'){
                 printf("post_ack#successful\n");
             }
-        //if its a receive#
+        
         }
+        //if its a receive#
         else if(posterrck != 0 && recerrck == 0){
             //printf("posterrck 1 recerrck 0\n");
             time(&_time);
             msg.timepost = *localtime(&_time);
-            msg.firstnm = (uint8_t)'A';
-            msg.lastnm = (uint8_t)'M';
+            msg.firstnm = 'A';
+            msg.lastnm = 'M';
             msg.opcode = (uint8_t)3;
 
             //printf("Sent RET\n");
@@ -179,7 +180,7 @@ int main() {
             //recv(sockfd, &ack, sizeof(msgstruct), 0);
             recvfrom(sockfd, &ack, sizeof(msgstruct), 0, (struct sockaddr *) &servaddr, &len);
 
-            if(ack.opcode == 4 && ack.firstnm == (uint8_t)'A' && ack.lastnm == (uint8_t)'M'){
+            if(ack.opcode == 4 && ack.firstnm == 'A' && ack.lastnm == 'M'){
                 printf("retrieve_ack#%s", ack.memo);
             }
         }
@@ -214,8 +215,8 @@ int main() {
 
 void resetmsg(msgstruct * msg){
         time_t actualtime;
-        msg->firstnm = (uint8_t)'A';
-        msg->lastnm = (uint8_t)'M';
+        msg->firstnm = 'A';
+        msg->lastnm = 'M';
         msg->opcode = (uint8_t)0;
         time(&actualtime);
         msg->timepost = *localtime(&actualtime);

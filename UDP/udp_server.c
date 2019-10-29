@@ -15,8 +15,8 @@
 
 typedef struct{
 
-    uint8_t firstnm; //first name 
-    uint8_t lastnm; //last name 
+    char firstnm; //first name 
+    char lastnm; //last name 
     uint8_t opcode; //opcode
     struct tm timepost; //timepost
     uint8_t length; //number of char to send
@@ -59,7 +59,7 @@ int main() {
         memset(&recv_buffer, 0, sizeof(recv_buffer));
         recvfrom(sockfd, &msg, sizeof(msgstruct), 0, (struct sockaddr *) &cliaddr, &len);
 
-        if(msg.opcode == 1 && msg.firstnm == (uint8_t)'A' && msg.lastnm == (uint8_t)'M'){
+        if(msg.opcode == 1 && msg.firstnm == 'A' && msg.lastnm == 'M'){
             //printf("POST#: %s", msg.memo);
             time(&_time);
             svrtime = *localtime(&_time);
@@ -88,20 +88,20 @@ int main() {
             //printf("recent len: %u\nrecent memo: %s", recent.length, recent.memo);
             msgstruct ack;
             ack.opcode = 2;
-            ack.firstnm = (uint8_t)'A';
-            ack.lastnm = (uint8_t)'M'; 
+            ack.firstnm = 'A';
+            ack.lastnm = 'M'; 
             
             //printf("sends da ack\n");
             sendto(sockfd, &ack, sizeof(msgstruct), 0, (struct sockaddr *) &cliaddr, sizeof(cliaddr));
             //printf("sent da ack\n");
         }
-        else if(msg.opcode == 3 && msg.firstnm == (uint8_t)'A' && msg.lastnm == (uint8_t)'M'){
+        else if(msg.opcode == 3 && msg.firstnm == 'A' && msg.lastnm == 'M'){
             //printf("RETRIEVE: %s", msg.memo);
             time(&_time);
             svrtime = *localtime(&_time);
             recent.opcode = 4;
-            recent.firstnm = (uint8_t)'A';
-            recent.lastnm = (uint8_t)'M'; 
+            recent.firstnm = 'A';
+            recent.lastnm = 'M'; 
 
             log = fopen("serverlog.txt", "a");
             fprintf(log, "<%d:%d:%d> [%s:%hu] retrieve#\n", msg.timepost.tm_hour,msg.timepost.tm_min,msg.timepost.tm_sec,inet_ntoa(cliaddr.sin_addr),
