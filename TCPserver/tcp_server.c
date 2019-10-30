@@ -19,10 +19,11 @@ typedef struct{
     //lastname
     char lastnm;
     //opcode
-    //x80 file upload
-    //x81 file upload ack
-    //x82 file download
-    //x83 file download ack
+    //0x80 file upload
+    //0x81 file upload ack
+    //0x82 file download
+    //0x83 file download ack
+    //0x69 file dne on server
     uint8_t opcode;
     //filename length
     uint8_t filenamelen;
@@ -53,6 +54,7 @@ void *worker_thread(void *arg) {
     datafilestruct datafile;
     FILE * fromclient;
     FILE * toclient;
+    int fileexists = 0;
 
     printf("[%d] worker thread started.\n", connfd);
 
@@ -129,15 +131,66 @@ void *worker_thread(void *arg) {
         else if(datafile.opcode == 0x82 && datafile.firstnm == 'A' && datafile.lastnm == 'M'){
             printf("DOWNLOAD: \n");
             
-            
-            
-            datafilestruct downloadfile;
-            downloadfile.opcode = 0x83;
-            downloadfile.firstnm = 'A';
-            downloadfile.lastnm = 'M'; 
-            
-            //printf("sends da ack\n");
-            ret = send(connfd, &downloadfile, sizeof(datafilestruct), 0);
+
+                // file exists
+                if(access(datafile.filename, F_OK) != -1) {
+                    fileexists = 1;
+                } 
+                // file doesn't exist
+                else {
+                    fileexists = 0;
+                    printf("Error: filename does not exist in current directory\n");
+                    datafilestruct downloadfiledne;
+                    downloadfiledne.opcode = 0x69;
+                    downloadfiledne.firstnm = 'A';
+                    downloadfiledne.lastnm = 'M'; 
+                    //printf("sends da ack\n");
+                    ret = send(connfd, &downloadfiledne, sizeof(datafilestruct), 0);
+                }
+
+                if(fileexists){
+                    printf("FILE EXISTS\n");
+                    //open file in read
+                    datafile.opcode = 0x83;
+                    datafile.firstnm = 'A';
+                    datafile.lastnm = 'M'; 
+                    FILE * uploadfile = fopen(datafile.filename, "rb");
+
+                    //check file size
+                    fseek(uploadfile, 0L, SEEK_END);
+                    // calculating the size of the file 
+                    datafile.filelen = ftell(uploadfile); 
+                    printf("filelen: %u\n", datafile.filelen);
+
+                    fseek(uploadfile, 0L, SEEK_SET);
+                    
+                    int i, j;
+                    //iterates by 1024 bytes
+                    for(int i = 0; i < datafile.filelen; i += 1024){
+                        //clear old or null data for new existing data
+                        printf("outer forloop\n");
+                        memset(&datafile.data, 0 ,sizeof(datafile.data));
+
+                        
+                        //gets 1024 bytes from file to read
+                        for(j = 0; j <= 1023 && j+i < datafile.filelen; j++){
+                            //printf("inner forloop\n");
+                            fread(&datafile.data[j], 1, 1, uploadfile);
+                            //printf("buffer size: %u\n", j);
+                        }
+                        //saves bufferlen (useful for when the last stream is <1024)
+                        datafile.filebufferlen = j - 1;
+
+                        //send the data
+                        printf("total buffer size: %u\n", datafile.filebufferlen);
+                        printf("what i'm sending:\n%s", datafile.data);
+                        ret = send(connfd, &datafile, sizeof(datafilestruct), 0);
+                        usleep(5000);
+                    }
+                    fclose(uploadfile);
+                    printf("UPLOAD DONE\n");
+                } 
+
         }
 
 
