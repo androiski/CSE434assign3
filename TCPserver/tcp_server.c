@@ -13,6 +13,31 @@
 
 #include <stdint.h>
 
+typedef struct{
+    
+    //firstname
+    char firstnm;
+    //lastname
+    char lastnm;
+    //opcode
+    //x80 file upload
+    //x81 file upload ack
+    //x82 file download
+    //x83 file download ack
+    uint8_t opcode;
+    //filename length
+    uint8_t filenamelen;
+    //specific length of the current buffer
+    uint8_t filebufferlen;
+    //length of actual file
+    uint32_t filelen;
+    //filename
+    char filename[256];
+    //chunk of data
+    unsigned char data[256];
+
+} datafilestruct;
+
 // This line must be included if you want to use multithreading.
 // Besides, use "gcc ./tcp_receive.c -lpthread -o tcp_receive" to compile
 // your code. "-lpthread" means link against the pthread library.
@@ -26,13 +51,14 @@ void *worker_thread(void *arg) {
     int ret;
     int connfd = (int) (long)arg;
     char recv_buffer[1024];
+    datafilestruct datafile;
 
     printf("[%d] worker thread started.\n", connfd);
 
     while (1) {
         ret = recv(connfd, 
-                    recv_buffer, 
-                    sizeof(recv_buffer), 
+                    &datafile, 
+                    sizeof(datafilestruct), 
                     0);
 
         if (ret < 0) {
@@ -48,6 +74,41 @@ void *worker_thread(void *arg) {
         // TODO: Process your message, receive chunks of the byte stream, 
         // write the chunks to a file. You also need an inner loop to 
         // receive and write each chunk.
+
+        if(datafile.opcode == 1 && datafile.firstnm == 'A' && datafile.lastnm == 'M'){
+            printf("UPLOAD: \n");
+            
+            
+            
+            datafilestruct ack;
+            ack.opcode = (uint8_t)2;
+            ack.firstnm = 'A';
+            ack.lastnm = 'M'; 
+            
+            printf("sends da ack\n");
+            ret = send(connfd, &ack, sizeof(datafilestruct), 0);
+            if (ret < 0) {
+                printf("connect() error: %s.\n", strerror(errno));
+                return -1;
+            }
+        }
+        else if(datafile.opcode == 3 && datafile.firstnm == 'A' && datafile.lastnm == 'M'){
+            printf("DOWNLOAD: \n");
+            
+            
+            
+            datafilestruct downloadfile;
+            downloadfile.opcode = (uint8_t)4;
+            downloadfile.firstnm = 'A';
+            downloadfile.lastnm = 'M'; 
+            
+            //printf("sends da ack\n");
+            ret = send(connfd, &downloadfile, sizeof(datafilestruct), 0);
+            if (ret < 0) {
+                printf("connect() error: %s.\n", strerror(errno));
+                return -1;
+            }
+        }
 
 
     }

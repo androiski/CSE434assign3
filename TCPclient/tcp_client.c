@@ -187,12 +187,13 @@ int main(int argc, char *argv[]) {
                     datafile.filebufferlen = j;
 
                     //send the data
-                    ret = send(sockfd, &datafile, sizeof(datafile), 0);
+                    ret = send(sockfd, &datafile, sizeof(datafilestruct), 0);
                     if (ret < 0) {
                         printf("connect() error: %s.\n", strerror(errno));
                         return -1;
                     }
                 }
+                fclose(uploadfile);
             }             
         }
         //if its a download$...
