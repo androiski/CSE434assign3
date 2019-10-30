@@ -153,7 +153,6 @@ int main() {
             //receieve what server replies
             len = sizeof(servaddr);
             msgstruct ack;
-            //recv(sockfd, &ack, sizeof(msgstruct), 0);
             recvfrom(sockfd, &ack, sizeof(msgstruct), 0, (struct sockaddr *) &servaddr, &len);
             //printf("%u %u %u\n", ack.firstnm, ack.lastnm, ack.opcode);
 
@@ -210,7 +209,7 @@ int main() {
         // TODO: You are supposed to call the recvfrom() function here.
         // The client will receive the acknowledgement from the server.
     }
-    return 0;
+    return 0;9
 }
 
 void resetmsg(msgstruct * msg){
