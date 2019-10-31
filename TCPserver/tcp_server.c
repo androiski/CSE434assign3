@@ -90,7 +90,7 @@ void *worker_thread(void *arg) {
         // receive and write each chunk.
 
         if(datafile.opcode == 0x80 && datafile.firstnm == 'A' && datafile.lastnm == 'M'){
-            //printf("UPLOAD: \n");
+            printf("CLIENT IS UPLOADING...\n");
             
             //gets name of file
             fromclient = fopen(datafile.filename, "wb");
@@ -119,17 +119,17 @@ void *worker_thread(void *arg) {
                     ack.firstnm = 'A';
                     ack.lastnm = 'M'; 
                     
-                    printf("sends da ack\n");
+                    //printf("sends da ack\n");
                     ret = send(connfd, &ack, sizeof(datafilestruct), 0);
                 }
             }
 
             fclose(fromclient);
-            printf("UPLOAD DONE\n");
+            printf("UPLOAD DONE!\n");
 
         }
         else if(datafile.opcode == 0x82 && datafile.firstnm == 'A' && datafile.lastnm == 'M'){
-            printf("DOWNLOAD: \n");
+            printf("CLIENT WANTS TO DOWNLOAD\n");
             
 
                 // file exists
@@ -144,12 +144,12 @@ void *worker_thread(void *arg) {
                     downloadfiledne.opcode = 0x69;
                     downloadfiledne.firstnm = 'A';
                     downloadfiledne.lastnm = 'M'; 
-                    //printf("sends da ack\n");
+
                     ret = send(connfd, &downloadfiledne, sizeof(datafilestruct), 0);
                 }
 
                 if(fileexists){
-                    printf("FILE EXISTS\n");
+                    printf("FILE EXISTS\t\t\tCLIENT IS DOWNLOADING...\n");
                     //open file in read
                     datafile.opcode = 0x83;
                     datafile.firstnm = 'A';
@@ -160,7 +160,7 @@ void *worker_thread(void *arg) {
                     fseek(uploadfile, 0L, SEEK_END);
                     // calculating the size of the file 
                     datafile.filelen = ftell(uploadfile); 
-                    printf("filelen: %u\n", datafile.filelen);
+                    //printf("filelen: %u\n", datafile.filelen);
 
                     fseek(uploadfile, 0L, SEEK_SET);
                     
@@ -168,11 +168,10 @@ void *worker_thread(void *arg) {
                     //iterates by 1024 bytes
                     for(int i = 0; i < datafile.filelen; i += 1024){
                         //clear old or null data for new existing data
-                        printf("outer forloop\n");
+                        //printf("outer forloop\n");
                         memset(&datafile.data, 0 ,sizeof(datafile.data));
 
                         
-                        //gets 1024 bytes from file to read
                         for(j = 0; j <= 1023 && j+i < datafile.filelen; j++){
                             //printf("inner forloop\n");
                             fread(&datafile.data[j], 1, 1, uploadfile);
@@ -182,13 +181,13 @@ void *worker_thread(void *arg) {
                         datafile.filebufferlen = j - 1;
 
                         //send the data
-                        printf("total buffer size: %u\n", datafile.filebufferlen);
-                        printf("what i'm sending:\n%s", datafile.data);
+                        //printf("total buffer size: %u\n", datafile.filebufferlen);
+                        //printf("what i'm sending:\n%s", datafile.data);
                         ret = send(connfd, &datafile, sizeof(datafilestruct), 0);
                         usleep(5000);
                     }
                     fclose(uploadfile);
-                    printf("UPLOAD DONE\n");
+                    printf("CLIENT DOWNLOAD COMPLETE!\n");
                 } 
 
         }

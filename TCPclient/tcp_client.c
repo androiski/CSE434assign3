@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
             }
 
             if(fileexists){
-                printf("FILE EXISTS\n");
+                printf("FILE EXISTS\t\t\tUPLOADING TO SERVER...\n");
                 //open file in read
                 FILE * uploadfile = fopen(datafile.filename, "rb");
 
@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
             recv(sockfd, &ack, sizeof(datafilestruct), 0);
             //if whatever is received is an ACK, opcode2, print success
             if(ack.opcode == 0x81 && ack.firstnm == 'A' && ack.lastnm == 'M'){
-                printf("upload_ack#upload_file_successful\n");
+                printf("upload_ack#uploaded_file_successfully!\n");
             }            
         }
         //if its a download$...
@@ -234,31 +234,31 @@ int main(int argc, char *argv[]) {
                 //printf("index saved: %d", i);
                 downloadreq.filename[i] = send_buffer[9+i];
             }
-            printf("filename: %s\n", downloadreq.filename);
+            //printf("filename: %s\n", downloadreq.filename);
 
             ret = send(sockfd, &downloadreq, sizeof(datafilestruct), 0);
             ret = recv(sockfd, &datafile, sizeof(datafilestruct), 0);
 
             if(datafile.opcode == 0x83 && datafile.firstnm == 'A' && datafile.lastnm == 'M'){
-                printf("DOWNLOADING: \n");
+                printf("FILE EXISTS\t\t\tDOWNLOADING...\n");
         
                 //gets name of file
                 fromserver = fopen(datafile.filename, "wb");
                 int i = 0;  int j = 0;
-                printf("FILE LEN: %u\n", datafile.filelen);
+                //printf("FILE LEN: %u\n", datafile.filelen);
                 for(i = 0;  i < datafile.filelen; i+= 1024){
                     //printf("UOTER FOORLOOP\n");
                     
                     
                     //write to file
                     for(j = 0; j <= datafile.filebufferlen && i+j < datafile.filelen; j++){
-                        printf("%c", datafile.data[j]);
+                        //printf("%c", datafile.data[j]);
                         fwrite(&datafile.data[j], 1, 1, fromserver);
                         fflush(fromserver);
                     }
 
                     memset(&datafile.data, 0, sizeof(datafilestruct));
-                    printf("i:%d  j:%d\n", i , j);
+                    //printf("i:%d  j:%d\n", i , j);
 
                     if(i + j < datafile.filelen){
                         ret = recv(sockfd, &datafile, sizeof(datafilestruct), 0);
@@ -274,10 +274,10 @@ int main(int argc, char *argv[]) {
                     // }
                 }
                 fclose(fromserver);
-                printf("DOWNLOAD DONE\n");
+                printf("download_ack$file_downloaded_successfully!\n");
             }
             else if(datafile.opcode == 0x69 && datafile.firstnm == 'A' && datafile.lastnm == 'M'){
-                printf("The file does not exist in the server.\n");
+                printf("Error: The file does not exist in the server.\n");
             }
 
 
